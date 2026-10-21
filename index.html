@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickTool Nova - Free Online Tools</title>
+  <meta name="description" content="Free online image resizing, compression and conversion tools.">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f7fb; color: #172033; }
+    header { background: #173f8a; color: white; padding: 28px 16px; text-align: center; }
+    main { max-width: 850px; margin: 28px auto; padding: 16px; }
+    .tool { background: white; padding: 20px; margin: 16px 0; border-radius: 12px; }
+    button { background: #2056b5; color: white; padding: 10px 16px; border: 0; border-radius: 6px; cursor: pointer; }
+    input { display: block; margin: 12px 0; max-width: 100%; }
+    footer { text-align: center; padding: 25px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>QuickTool Nova</h1>
+    <p>Free Online Tools for Everyone</p>
+  </header>
+  <main>
+    <section class="tool">
+      <h2>Image Resizer</h2>
+      <p>Resize an image to your preferred dimensions.</p>
+      <input type="file" id="resizeFile" accept="image/*">
+      <label>Width: <input type="number" id="width" value="1280" min="1"></label>
+      <label>Height: <input type="number" id="height" value="720" min="1"></label>
+      <button onclick="resizeImage()">Resize Image</button>
+      <div id="resizeResult"></div>
+    </section>
+    <section class="tool">
+      <h2>Image Format Converter</h2>
+      <p>Convert an image to PNG or JPG.</p>
+      <input type="file" id="convertFile" accept="image/*">
+      <select id="format">
+        <option value="image/png">PNG</option>
+        <option value="image/jpeg">JPG</option>
+      </select>
+      <button onclick="convertImage()">Convert Image</button>
+      <div id="convertResult"></div>
+    </section>
+    <section class="tool">
+      <h2>Image Compressor</h2>
+      <p>Compress an image to reduce its file size.</p>
+      <input type="file" id="compressFile" accept="image/jpeg,image/png,image/webp">
+      <button onclick="compressImage()">Compress Image</button>
+      <div id="compressResult"></div>
+    </section>
+  </main>
+  <footer>© 2026 QuickTool Nova</footer>
+  <script>
+    function loadImage(file, callback) {
+      if (!file) { alert("Please select an image first."); return; }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => { callback(img); URL.revokeObjectURL(url); };
+      img.onerror = () => { URL.revokeObjectURL(url); alert("Could not open this image."); };
+      img.src = url;
+    }
+    function downloadCanvas(img, w, h, type, quality, target) {
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => {
+        if (!blob) { alert("Could not process this image."); return; }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "quicktool-nova." + (type === "image/png" ? "png" : "jpg");
+        a.textContent = "Download image";
+        target.replaceChildren(a);
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      }, type, quality);
+    }
+    function resizeImage() {
+      const file = document.getElementById("resizeFile").files[0];
+      const w = Number(document.getElementById("width").value);
+      const h = Number(document.getElementById("height").value);
+      if (!Number.isInteger(w) || !Number.isInteger(h) || w < 1 || h < 1 || w > 10000 || h > 10000) { alert("Enter dimensions from 1 to 10000."); return; }
+      loadImage(file, img => downloadCanvas(img, w, h, "image/png", 1, document.getElementById("resizeResult")));
+    }
+    function convertImage() {
+      const file = document.getElementById("convertFile").files[0];
+      const type = document.getElementById("format").value;
+      loadImage(file, img => downloadCanvas(img, img.naturalWidth, img.naturalHeight, type, 0.9, document.getElementById("convertResult")));
+    }
+    function compressImage() {
+      const file = document.getElementById("compressFile").files[0];
+      loadImage(file, img => {
+        const scale = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+        downloadCanvas(img, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale), "image/jpeg", 0.65, document.getElementById("compressResult"));
+      });
+    }
+  </script>
+</body>
+</html>
