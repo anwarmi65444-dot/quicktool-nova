@@ -1,118 +1,353 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuickTool Nova - Free Online Tools</title>
-  <meta name="description" content="Free online image resizing, compression and conversion tools.">
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f4f7fb; color: #172033; }
-    header { background: #173f8a; color: white; padding: 28px 16px; text-align: center; }
-    main { max-width: 850px; margin: 28px auto; padding: 16px; }
-    .tool { background: white; padding: 20px; margin: 16px 0; border-radius: 12px; }
-    button { background: #2056b5; color: white; padding: 10px 16px; border: 0; border-radius: 6px; cursor: pointer; }
-    input { display: block; margin: 12px 0; max-width: 100%; }
-    footer { text-align: center; padding: 25px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickTool Nova - Free Online Tools</title>
+<meta name="description" content="Free online image resizing, compression, conversion, word counting, text and developer tools.">
 <meta name="google-adsense-account" content="ca-pub-7837485225588681">
-<!-- Google tag (gtag.js) -->
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-QQ7SQKGFTD"></script>
 <script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-QQ7SQKGFTD');
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QQ7SQKGFTD"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-QQ7SQKGFTD');
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
+header{background:#173f8a;color:white;padding:30px 15px;text-align:center}
+header h1{margin:0 0 10px}
+main{max-width:1100px;margin:25px auto;padding:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.tool{background:#fff;padding:20px;border-radius:12px;box-shadow:0 3px 12px #0000000d;min-width:0}
+.tool h2{font-size:20px;color:#173f8a;margin-top:0}
+.tool p{line-height:1.5;color:#555}
+input,select,textarea{width:100%;padding:10px;margin:7px 0;border:1px solid #ccd4e0;border-radius:6px;font-size:15px}
+button{width:100%;background:#2056b5;color:white;padding:11px;border:0;border-radius:6px;cursor:pointer;margin-top:8px}
+button:hover{background:#173f8a}
+.result{margin-top:12px;overflow-wrap:anywhere}
+.result img{display:block;max-width:100%;height:auto;margin:10px 0}
+.result a{display:inline-block;margin:10px 0;color:#174cb0}
+footer{text-align:center;padding:25px;background:#e8eef8;margin-top:30px;line-height:2}
+footer a{color:#173f8a;margin:0 5px}
+h2.section{color:#173f8a;margin:30px 0 15px}
+</style>
 </head>
 <body>
-  <header>
-    <h1>QuickTool Nova</h1>
-    <p>Free Online Tools for Everyone</p>
-  </header>
-  <main>
-    <section class="tool">
-      <h2>Image Resizer</h2>
-      <p>Resize an image to your preferred dimensions.</p>
-      <input type="file" id="resizeFile" accept="image/*">
-      <label>Width: <input type="number" id="width" value="1280" min="1"></label>
-      <label>Height: <input type="number" id="height" value="720" min="1"></label>
-      <button onclick="resizeImage()">Resize Image</button>
-      <div id="resizeResult"></div>
-    </section>
-    <section class="tool">
-      <h2>Image Format Converter</h2>
-      <p>Convert an image to PNG or JPG.</p>
-      <input type="file" id="convertFile" accept="image/*">
-      <select id="format">
-        <option value="image/png">PNG</option>
-        <option value="image/jpeg">JPG</option>
-      </select>
-      <button onclick="convertImage()">Convert Image</button>
-      <div id="convertResult"></div>
-    </section>
-    <section class="tool">
-      <h2>Image Compressor</h2>
-      <p>Compress an image to reduce its file size.</p>
-      <input type="file" id="compressFile" accept="image/jpeg,image/png,image/webp">
-      <button onclick="compressImage()">Compress Image</button>
-      <div id="compressResult"></div>
-    </section>
-  </main>
-  <footer>© 2026 QuickTool Nova</footer>
-  <script>
-    function loadImage(file, callback) {
-      if (!file) { alert("Please select an image first."); return; }
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => { callback(img); URL.revokeObjectURL(url); };
-      img.onerror = () => { URL.revokeObjectURL(url); alert("Could not open this image."); };
-      img.src = url;
-    }
-    function downloadCanvas(img, w, h, type, quality, target) {
-      const canvas = document.createElement("canvas");
-      canvas.width = w; canvas.height = h;
-      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-      canvas.toBlob(blob => {
-        if (!blob) { alert("Could not process this image."); return; }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "quicktool-nova." + (type === "image/png" ? "png" : "jpg");
-        a.textContent = "Download image";
-        target.replaceChildren(a);
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-      }, type, quality);
-    }
-    function resizeImage() {
-      const file = document.getElementById("resizeFile").files[0];
-      const w = Number(document.getElementById("width").value);
-      const h = Number(document.getElementById("height").value);
-      if (!Number.isInteger(w) || !Number.isInteger(h) || w < 1 || h < 1 || w > 10000 || h > 10000) { alert("Enter dimensions from 1 to 10000."); return; }
-      loadImage(file, img => downloadCanvas(img, w, h, "image/png", 1, document.getElementById("resizeResult")));
-    }
-    function convertImage() {
-      const file = document.getElementById("convertFile").files[0];
-      const type = document.getElementById("format").value;
-      loadImage(file, img => downloadCanvas(img, img.naturalWidth, img.naturalHeight, type, 0.9, document.getElementById("convertResult")));
-    }
-    function compressImage() {
-      const file = document.getElementById("compressFile").files[0];
-      loadImage(file, img => {
-        const scale = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
-        downloadCanvas(img, Math.round(img.naturalWidth * scale), Math.round(img.naturalHeight * scale), "image/jpeg", 0.65, document.getElementById("compressResult"));
-      });
-    }
-  </script>
+
+<header>
+<h1>QuickTool Nova</h1>
+<p>Free Online Tools for Everyone</p>
+</header>
+
+<main>
+<h2 class="section">Image Tools</h2>
+<div class="grid">
+
+<section class="tool">
+<h2>1. Image Resizer</h2>
+<p>Resize an image to your preferred dimensions.</p>
+<input type="file" id="resizeFile" accept="image/*">
+<label>Width (pixels)</label>
+<input type="number" id="width" value="1280" min="1" max="10000">
+<label>Height (pixels)</label>
+<input type="number" id="height" value="720" min="1" max="10000">
+<button onclick="resizeImage()">Resize Image</button>
+<div id="resizeResult" class="result"></div>
+</section>
+
+<section class="tool">
+<h2>2. Image Format Converter</h2>
+<p>Convert images to PNG, JPG or WebP.</p>
+<input type="file" id="convertFile" accept="image/*">
+<select id="format">
+<option value="image/png">PNG</option>
+<option value="image/jpeg">JPG</option>
+<option value="image/webp">WebP</option>
+</select>
+<button onclick="convertImage()">Convert Image</button>
+<div id="convertResult" class="result"></div>
+</section>
+
+<section class="tool">
+<h2>3. Image Compressor</h2>
+<p>Reduce the image file size by adjusting quality.</p>
+<input type="file" id="compressFile" accept="image/*">
+<label>Image quality: <span id="qualityLabel">65%</span></label>
+<input type="range" id="quality" min="10" max="95" value="65" oninput="document.getElementById('qualityLabel').textContent=this.value+'%'">
+<button onclick="compressImage()">Compress Image</button>
+<div id="compressResult" class="result"></div>
+</section>
+
+</div>
+
+<h2 class="section">Text Tools</h2>
+<div class="grid">
+
+<section class="tool">
+<h2>4. Word Counter</h2>
+<p>Count words, characters and spaces in your text.</p>
+<textarea id="wordInput" placeholder="Type or paste your text..." oninput="countWords()"></textarea>
+<div id="wordResult" class="result">Words: 0 | Characters: 0</div>
+</section>
+
+<section class="tool">
+<h2>5. Text Case Converter</h2>
+<textarea id="caseInput" placeholder="Enter your text..."></textarea>
+<button onclick="convertCase('upper')">UPPERCASE</button>
+<button onclick="convertCase('lower')">lowercase</button>
+<button onclick="convertCase('title')">Title Case</button>
+<div id="caseResult" class="result"></div>
+</section>
+
+<section class="tool">
+<h2>6. Remove Extra Spaces</h2>
+<textarea id="spaceInput" placeholder="Paste text here..."></textarea>
+<button onclick="removeSpaces()">Clean Text</button>
+<div id="spaceResult" class="result"></div>
+</section>
+
+<section class="tool">
+<h2>7. Text to Slug</h2>
+<p>Convert an article title into a URL-friendly slug.</p>
+<input id="slugInput" placeholder="Enter an article title">
+<button onclick="makeSlug()">Generate Slug</button>
+<div id="slugResult" class="result"></div>
+</section>
+
+</div>
+
+<h2 class="section">Developer and Utility Tools</h2>
+<div class="grid">
+
+<section class="tool">
+<h2>8. JSON Formatter</h2>
+<textarea id="jsonInput" placeholder='Enter JSON, e.g. {"name":"Nova"}'></textarea>
+<button onclick="formatJSON()">Format JSON</button>
+<div id="jsonResult" class="result"></div>
+</section>
+
+<section class="tool">
+<h2>9. Password Generator</h2>
+<p>Generate a random password in your browser.</p>
+<label>Password length (6–64)</label>
+<input type="number" id="passLength" value="16" min="6" max="64">
+<button onclick="generatePassword()">Generate Password</button>
+<div id="passResult" class="result"></div>
+</section>
+
+</div>
+</main>
+
+<footer>
+<strong>QuickTool Nova</strong><br>
+<a href="about.html">About Us</a> |
+<a href="privacy-policy.html">Privacy Policy</a> |
+<a href="contact.html">Contact Us</a> |
+<a href="terms.html">Terms of Use</a>
+<br>© 2026 QuickTool Nova. All rights reserved.
 </footer>
-</footer>
-</footer>
-<footer style="text-align:center; padding:20px; margin-top:30px;">
-  <a href="about.html">About Us</a> |
-  <a href="privacy-policy.html">Privacy Policy</a> |
-  <a href="contact.html">Contact Us</a> |
-  <a href="terms.html">Terms of Use</a>
-</footer> 
+
+<script>
+function getImage(id, callback) {
+  const file = document.getElementById(id).files[0];
+  if (!file) {
+    alert("Please select an image first.");
+    return;
+  }
+  if (!file.type.startsWith("image/")) {
+    alert("Please select a valid image.");
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+
+  img.onload = () => {
+    try {
+      callback(img);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    alert("Unable to open this image.");
+  };
+
+  img.src = url;
+}
+
+function processImage(img, w, h, type, quality, targetId) {
+  if (!Number.isInteger(w) || !Number.isInteger(h) ||
+      w < 1 || h < 1 || w > 10000 || h > 10000) {
+    alert("Enter width and height between 1 and 10000.");
+    return;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    alert("Your browser cannot process this image.");
+    return;
+  }
+
+  if (type === "image/jpeg") {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  ctx.drawImage(img, 0, 0, w, h);
+
+  canvas.toBlob(blob => {
+    if (!blob) {
+      alert("Image processing failed.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const ext = type === "image/jpeg" ? "jpg" :
+                type === "image/webp" ? "webp" : "png";
+
+    const box = document.getElementById(targetId);
+    box.replaceChildren();
+
+    const preview = document.createElement("img");
+    preview.src = url;
+    preview.alt = "Processed image preview";
+
+    const info = document.createElement("p");
+    info.textContent = "Output size: " + (blob.size / 1024).toFixed(1) + " KB";
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "quicktool-nova." + ext;
+    link.textContent = "Download Image";
+
+    box.append(preview, info, link);
+  }, type, quality);
+}
+
+function resizeImage() {
+  const w = Number(document.getElementById("width").value);
+  const h = Number(document.getElementById("height").value);
+  getImage("resizeFile", img => {
+    processImage(img, w, h, "image/png", 1, "resizeResult");
+  });
+}
+
+function convertImage() {
+  const type = document.getElementById("format").value;
+  getImage("convertFile", img => {
+    processImage(img, img.naturalWidth, img.naturalHeight,
+      type, 0.9, "convertResult");
+  });
+}
+
+function compressImage() {
+  const quality = Number(document.getElementById("quality").value) / 100;
+  getImage("compressFile", img => {
+    const scale = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * scale));
+    const h = Math.max(1, Math.round(img.naturalHeight * scale));
+    processImage(img, w, h, "image/jpeg", quality, "compressResult");
+  });
+}
+
+function countWords() {
+  const t = document.getElementById("wordInput").value;
+  const words = t.trim() ? t.trim().split(/\s+/u).length : 0;
+  document.getElementById("wordResult").textContent =
+    "Words: " + words + " | Characters: " + t.length +
+    " | Without spaces: " + t.replace(/\s/g, "").length;
+}
+
+function showText(id, value) {
+  const box = document.getElementById(id);
+  box.replaceChildren();
+
+  const pre = document.createElement("pre");
+  pre.style.whiteSpace = "pre-wrap";
+  pre.textContent = value;
+
+  const btn = document.createElement("button");
+  btn.textContent = "Copy Result";
+  btn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      btn.textContent = "Copied!";
+    } catch {
+      alert("Please select and copy the text manually.");
+    }
+  };
+
+  box.append(pre, btn);
+}
+
+function convertCase(type) {
+  const t = document.getElementById("caseInput").value;
+  let out = t;
+
+  if (type === "upper") out = t.toUpperCase();
+  if (type === "lower") out = t.toLowerCase();
+  if (type === "title") {
+    out = t.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+  }
+
+  showText("caseResult", out);
+}
+
+function removeSpaces() {
+  const t = document.getElementById("spaceInput").value;
+  showText("spaceResult", t.replace(/[ \t]+/g, " ").trim());
+}
+
+function makeSlug() {
+  const t = document.getElementById("slugInput").value;
+  const slug = t.toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s-]+/g, "-");
+
+  showText("slugResult", slug);
+}
+
+function formatJSON() {
+  try {
+    const obj = JSON.parse(document.getElementById("jsonInput").value);
+    showText("jsonResult", JSON.stringify(obj, null, 2));
+  } catch (e) {
+    showText("jsonResult", "Invalid JSON: " + e.message);
+  }
+}
+
+function generatePassword() {
+  const n = Number(document.getElementById("passLength").value);
+
+  if (!Number.isInteger(n) || n < 6 || n > 64) {
+    alert("Choose a password length between 6 and 64.");
+    return;
+  }
+
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?";
+  const bytes = new Uint32Array(n);
+  crypto.getRandomValues(bytes);
+
+  let password = "";
+  for (let i = 0; i < n; i++) {
+    password += chars[bytes[i] % chars.length];
+  }
+
+  showText("passResult", password);
+}
+</script>
+
 </body>
 </html>
